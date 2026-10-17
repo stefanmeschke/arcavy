@@ -1,6 +1,7 @@
 [tools]
 go = "1.27"
 node = "22"
+hk = "2.6.0"
 markdownlint-cli2 = "0.23.2"
 typos = "1.51.1"
 

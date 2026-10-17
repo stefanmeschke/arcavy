@@ -1,0 +1,20 @@
+// hk is only used for the git pre-commit hook. CI and manual runs use `mise run <task>`.
+amends "package://github.com/jdx/hk/releases/download/v2.6.0/hk@2.6.0#/Config.pkl"
+import "package://github.com/jdx/hk/releases/download/v2.6.0/hk@2.6.0#/Builtins.pkl"
+
+hooks {
+  ["pre-commit"] {
+    fix = true
+    stash = "git"
+    steps {
+      ["trailing_whitespace"] = Builtins.trailing_whitespace
+      ["newlines"] = Builtins.newlines
+      ["typos"] = Builtins.typos
+      ["markdownlint"] {
+        glob = List("**/*.md")
+        check = "markdownlint-cli2 {{files}}"
+        fix = "markdownlint-cli2 --fix {{files}}"
+      }
+    }
+  }
+}
