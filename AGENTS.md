@@ -13,7 +13,10 @@ Status: early. Nothing is scaffolded yet. Keep this file short and grow it only 
 
 ## Tooling
 
-- Tool versions are managed with [mise](https://github.com/jdx/mise) in `mise.toml` (Go and Node). Run `mise install` after cloning. Add a tool only when a part needs it; pin experiment-specific tools in the experiment's own `mise.toml`.
+- Tool versions are managed with [mise](https://github.com/jdx/mise) in `mise.toml` (Go, Node, and the lint tools). Run `mise install` after cloning. Add a tool only when a part needs it; pin experiment-specific tools in the experiment's own `mise.toml`.
+- Everything runnable is a mise task: `mise run lint` (Markdown via markdownlint-cli2, spelling via typos). See `mise tasks`. Add new checks as tasks.
+- [hk](https://hk.jdx.dev) (`hk.pkl`) is only for the git pre-commit hook (auto-fixes staged files). Run `hk install` once per clone. Don't call it from CI or tasks.
+- Keep Markdown consistent: fix lint errors rather than disabling rules; change rules in `.markdownlint-cli2.yaml` only on purpose.
 
 ## Layout
 
