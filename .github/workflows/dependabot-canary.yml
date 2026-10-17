@@ -1,0 +1,14 @@
+name: Dependabot canary
+
+# Intentionally pinned to an outdated action so Dependabot has something to bump.
+# Used to verify the Dependabot + auto-merge setup end to end.
+on: workflow_dispatch
+
+permissions: {}
+
+jobs:
+  canary:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608 # v4.1.0
+      - run: echo canary
