@@ -10,6 +10,7 @@ Arcavy is a household-first collection manager. Add items from a photo, a barcod
 
 ```sh
 mise install   # installs the tool versions from mise.toml
+hk install     # git pre-commit hook (auto-fixes staged files)
 ```
 
 ## Repository
