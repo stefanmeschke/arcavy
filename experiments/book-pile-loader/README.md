@@ -7,7 +7,7 @@ Part of [#1](https://github.com/stefanmeschke/arcavy/issues/1).
 ## Run
 
 ```sh
-mise run dev:book-pile-loader
+mise run //experiments/book-pile-loader:dev
 ```
 
 ## Look
@@ -20,15 +20,15 @@ The shadow on the ground is analytic instead of shadow-mapped. Each frame the bo
 
 ## Stack
 
-TypeScript, three.js, Vite, pnpm. Dependencies are installed with a 7 day `minimumReleaseAge` (`pnpm-workspace.yaml`), matching the Dependabot cooldown.
+TypeScript, three.js, Vite, pnpm, Vitest. Dependencies are pinned to exact versions.
 
 ## Tests
 
 ```sh
-mise run test
+mise run //experiments/book-pile-loader:test
 ```
 
-A Playwright smoke test serves the production build in headless Chromium (software WebGL) and checks that the page has no console or page errors, the canvas renders a non-blank pile containing the navy and orange palette colours, and the pile animates when reduced motion is off. It exists so dependency bumps (`three`, `vite`) fail CI when rendering breaks.
+A Vitest browser-mode smoke test (Playwright provider, headless Chromium with software WebGL) mounts the scene and checks that there are no console or page errors, the canvas renders a non-blank pile containing the navy and orange palette colours, and the pile animates when reduced motion is off. It exists so dependency bumps (`three`, `vite`) fail CI when rendering breaks. The `test` task installs Chromium first.
 
 ## Scope
 
@@ -36,4 +36,4 @@ This experiment is self-contained and never imported by other parts. Promote it 
 
 ## Debug controls
 
-The dev server (`mise run dev:book-pile-loader`) shows a small panel at the bottom left to pause/play, scrub the timeline and change the speed. It is not part of production builds.
+The dev server (`mise run //experiments/book-pile-loader:dev`) shows a small panel at the bottom left to pause/play, scrub the timeline and change the speed. It is not part of production builds.

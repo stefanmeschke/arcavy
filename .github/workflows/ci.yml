@@ -17,8 +17,8 @@ jobs:
       - name: Lint
         run: mise run lint
       - name: Typecheck
-        run: mise run 'typecheck:*'
+        run: mise run '//...:typecheck'
       - name: Build
-        run: mise run 'build:*'
+        run: mise run '//...:build'
       - name: Test
-        run: mise run test
+        run: mise run '//...:test'

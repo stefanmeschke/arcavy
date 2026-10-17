@@ -1,4 +1,8 @@
 min_version = "2026.10.8"
+monorepo_root = true
+
+[monorepo]
+config_roots = ["experiments/*"]
 
 [settings]
 experimental = true
@@ -33,54 +37,20 @@ run = "oxfmt --check"
 description = "Format JS/TS/JSON/HTML/CSS with Oxfmt"
 run = "oxfmt"
 
-[deps.book-pile-loader]
-description = "Install book-pile-loader dependencies"
-run = "pnpm install --frozen-lockfile"
-dir = "experiments/book-pile-loader"
-auto = true
-sources = ["package.json", "pnpm-lock.yaml", "pnpm-workspace.yaml"]
-outputs = ["node_modules"]
-
-[tasks."dev:book-pile-loader"]
-description = "Serve book-pile-loader experiment"
-dir = "experiments/book-pile-loader"
-run = "pnpm dev"
-
-[tasks."typecheck:book-pile-loader"]
-description = "Typecheck book-pile-loader experiment"
-dir = "experiments/book-pile-loader"
-run = "pnpm typecheck"
-
-[tasks."build:book-pile-loader"]
-description = "Build book-pile-loader experiment"
-dir = "experiments/book-pile-loader"
-run = "pnpm build"
-
 [tasks.lint]
 description = "Run all linters"
 depends = ["lint:*"]
 
-[tasks."install:browsers:book-pile-loader"]
-description = "Install the Chromium browser for Playwright (no-op when present)"
-dir = "experiments/book-pile-loader"
-run = "if [ -n \"$CI\" ]; then pnpm exec playwright install --with-deps chromium; else pnpm exec playwright install chromium; fi"
-
-[tasks."test:book-pile-loader"]
-description = "Playwright rendering smoke test for book-pile-loader"
-depends = ["install:browsers:book-pile-loader"]
-dir = "experiments/book-pile-loader"
-run = "pnpm exec playwright test"
-
 [tasks.test]
 description = "Run all tests"
-depends = ["test:*"]
+depends = ["//...:test"]
 
 [tasks.ci]
 description = "Everything CI runs"
 # Sequential, like the CI workflow steps.
 run = [
   { task = "lint" },
-  { task = "typecheck:*" },
-  { task = "build:*" },
+  { task = "//...:typecheck" },
+  { task = "//...:build" },
   { task = "test" },
 ]

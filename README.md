@@ -12,8 +12,6 @@ Arcavy is a household-first collection manager. Add items from a photo, a barcod
 mise install   # installs the tool versions from mise.toml
 ```
 
-`mise run dev:<name>` serves an experiment and `mise run ci` runs everything CI runs.
-
 ## Repository
 
 - `experiments/`: throwaway experiments, one self-contained folder each.
