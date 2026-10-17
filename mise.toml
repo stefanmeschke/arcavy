@@ -16,3 +16,11 @@ run = "typos"
 [tasks.lint]
 description = "Run all linters"
 depends = ["lint:*"]
+
+[tasks.test]
+description = "Run all tests"
+run = "echo 'no tests yet'"
+
+[tasks.ci]
+description = "Everything CI runs"
+depends = ["lint", "test"]
