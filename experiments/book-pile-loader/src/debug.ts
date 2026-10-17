@@ -1,5 +1,5 @@
 /** Dev-only controls: pause/play, scrub the timeline, change speed. */
-export interface DebugControls {
+interface DebugControls {
   paused: boolean;
   speed: number;
   sync(time: number): void;
@@ -8,12 +8,14 @@ export interface DebugControls {
 export function createDebugControls(total: number, onScrub: (time: number) => void): DebugControls {
   const panel = document.createElement("div");
   panel.style.cssText =
-    "position:fixed;left:12px;bottom:12px;display:flex;gap:8px;align-items:center;" +
+    "position:fixed;left:12px;bottom:12px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;max-width:calc(100vw - 24px);box-sizing:border-box;" +
     "padding:6px 10px;border-radius:8px;background:#0000000d;font:12px system-ui,sans-serif;color:#333";
 
   const button = document.createElement("button");
+  button.type = "button";
   const slider = document.createElement("input");
   slider.type = "range";
+  slider.ariaLabel = "Timeline";
   slider.min = "0";
   slider.max = String(total);
   slider.step = "0.01";
@@ -21,6 +23,7 @@ export function createDebugControls(total: number, onScrub: (time: number) => vo
   const readout = document.createElement("span");
   readout.style.cssText = "min-width:5.5em;font-variant-numeric:tabular-nums";
   const speed = document.createElement("select");
+  speed.ariaLabel = "Speed";
   for (const s of [0.1, 0.25, 0.5, 1, 2]) {
     speed.add(new Option(`${s}×`, String(s), false, s === 1));
   }

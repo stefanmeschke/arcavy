@@ -1,3 +1,11 @@
 {
-  "ignorePatterns": ["**/*.md", "pnpm-lock.yaml", "mise.toml", "node_modules", "dist"]
+  "ignorePatterns": [
+    "**/*.md",
+    "pnpm-lock.yaml",
+    "mise.toml",
+    "node_modules",
+    "dist",
+    "test-results",
+    "playwright-report"
+  ]
 }

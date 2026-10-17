@@ -8,37 +8,47 @@ const SOFT_BLUR = 24; // px
 const CONTACT_BLUR = 10; // px
 const CONTACT_REACH = 1.2; // height above the ground at which the contact term has faded out
 const SOFT_FADE_HEIGHT = 7; // height above the ground at which a falling book no longer casts a visible shadow
-const SHADOW_COLOR = 0x14213d;
+const SHADOW_RGB = "20,33,61"; // navy #14213d
 const SOFT_OPACITY = 0.2;
 const CONTACT_OPACITY = 0.35;
 
-const CORNERS = [-1, 1].flatMap((sx) => [0, 1].flatMap((sy) => [-1, 1].map((sz) => [sx, sy, sz])));
+type P2 = [number, number];
+
+const CORNERS = [-1, 1].flatMap((sx) =>
+  [0, 1].flatMap((sy) => [-1, 1].map((sz): [number, number, number] => [sx, sy, sz])),
+);
 
 interface Layer {
   ctx: CanvasRenderingContext2D;
   texture: THREE.CanvasTexture;
-  mesh: THREE.Mesh;
   res: number;
   blur: number;
 }
 
-function cross(o: number[], a: number[], b: number[]) {
-  return (a[0] - o[0]) * (b[1] - o[1]) - (a[1] - o[1]) * (b[0] - o[0]);
+function cross([ox, oy]: P2, [ax, ay]: P2, [bx, by]: P2) {
+  return (ax - ox) * (by - oy) - (ay - oy) * (bx - ox);
 }
 
-/** Convex hull (monotone chain). */
-function hull(points: number[][]): number[][] {
-  const p = [...points].sort((a, b) => a[0] - b[0] || a[1] - b[1]);
-  const build = (list: number[][]) => {
-    const out: number[][] = [];
-    for (const q of list) {
-      while (out.length >= 2 && cross(out[out.length - 2], out[out.length - 1], q) <= 0) out.pop();
+/** Convex hull (monotone chain). Sorts `points` in place. */
+function hull(points: P2[]): P2[] {
+  points.sort((a, b) => a[0] - b[0] || a[1] - b[1]);
+  const build = (reverse: boolean) => {
+    const out: P2[] = [];
+    for (let k = 0; k < points.length; k++) {
+      const q = points[reverse ? points.length - 1 - k : k];
+      if (!q) continue;
+      for (;;) {
+        const a = out[out.length - 2];
+        const b = out[out.length - 1];
+        if (!a || !b || cross(a, b, q) > 0) break;
+        out.pop();
+      }
       out.push(q);
     }
     out.pop();
     return out;
   };
-  return [...build(p), ...build([...p].reverse())];
+  return [...build(false), ...build(true)];
 }
 
 /**
@@ -59,7 +69,6 @@ export function createGroundShadow(sunPosition: THREE.Vector3, center: THREE.Vec
       new THREE.PlaneGeometry(AREA, AREA).rotateX(-Math.PI / 2),
       new THREE.MeshBasicMaterial({
         map: texture,
-        color: SHADOW_COLOR,
         opacity,
         transparent: true,
         depthWrite: false,
@@ -68,7 +77,9 @@ export function createGroundShadow(sunPosition: THREE.Vector3, center: THREE.Vec
     mesh.position.set(center.x, 0.002 + order * 0.001, center.y);
     mesh.renderOrder = order;
     object.add(mesh);
-    return { ctx: canvas.getContext("2d") as CanvasRenderingContext2D, texture, mesh, res, blur };
+    const ctx = canvas.getContext("2d");
+    if (!ctx) throw new Error("2D canvas context unavailable");
+    return { ctx, texture, res, blur };
   };
   const soft = makeLayer(SOFT_RES, SOFT_BLUR, SOFT_OPACITY, 1);
   const contact = makeLayer(CONTACT_RES, CONTACT_BLUR, CONTACT_OPACITY, 2);
@@ -82,11 +93,14 @@ export function createGroundShadow(sunPosition: THREE.Vector3, center: THREE.Vec
     layer.ctx.clearRect(0, 0, layer.res, layer.res);
   }
 
-  /** Fill a polygon with a blurred edge (drawn off canvas, its shadow lands in place). */
-  function fill(layer: Layer, polygon: number[][], alpha: number) {
+  /**
+   * Fill a polygon with a blurred edge. Canvas blur only applies to shadows, so the polygon is
+   * drawn 2 * res to the left, off canvas, and shadowOffsetX moves its blurred shadow back in place.
+   */
+  function fill(layer: Layer, polygon: P2[], alpha: number) {
     const { ctx, res } = layer;
     ctx.save();
-    ctx.shadowColor = `rgba(0,0,0,${alpha})`;
+    ctx.shadowColor = `rgba(${SHADOW_RGB},${alpha})`;
     ctx.shadowBlur = layer.blur;
     ctx.shadowOffsetX = res * 2;
     ctx.fillStyle = "#000";
@@ -102,22 +116,55 @@ export function createGroundShadow(sunPosition: THREE.Vector3, center: THREE.Vec
   }
 
   /** Ground point below a world point, moved along the sun rays. */
-  const project = (v: THREE.Vector3, lift = 1): number[] => [
-    v.x - (toSun.x / toSun.y) * Math.max(0, v.y) * lift,
-    v.z - (toSun.z / toSun.y) * Math.max(0, v.y) * lift,
+  const project = (v: THREE.Vector3): P2 => [
+    v.x - (toSun.x / toSun.y) * Math.max(0, v.y),
+    v.z - (toSun.z / toSun.y) * Math.max(0, v.y),
   ];
 
-  function update(groups: { group: THREE.Group; size: BookSize }[]) {
+  const v = new THREE.Vector3();
+  const projected: P2[] = [];
+  const footprint: P2[] = [];
+  const POSE_STRIDE = 7;
+  let signature = new Float64Array(0);
+
+  /** True if any book's visibility or pose differs from the last call. */
+  function posesChanged(books: { group: THREE.Group }[]) {
+    if (signature.length !== books.length * POSE_STRIDE) {
+      signature = new Float64Array(books.length * POSE_STRIDE).fill(NaN);
+    }
+    let changed = false;
+    let k = 0;
+    const track = (value: number) => {
+      if (signature[k] !== value) {
+        signature[k] = value;
+        changed = true;
+      }
+      k++;
+    };
+    for (const { group } of books) {
+      track(group.visible ? 1 : 0);
+      track(group.position.x);
+      track(group.position.y);
+      track(group.position.z);
+      track(group.rotation.y);
+      track(group.rotation.z);
+      track(group.scale.x);
+    }
+    return changed;
+  }
+
+  /** Redraws only when a book moved since the last call. */
+  function update(books: { group: THREE.Group; size: BookSize }[]) {
+    if (!posesChanged(books)) return;
+
     clear(soft);
     clear(contact);
-    const v = new THREE.Vector3();
     let any = false;
-    for (const { group, size } of groups) {
+    for (const { group, size } of books) {
       if (!group.visible) continue;
       any = true;
       group.updateMatrixWorld();
-      const projected: number[][] = [];
-      const footprint: number[][] = [];
+      projected.length = footprint.length = 0;
       let low = Infinity;
       for (const [sx, sy, sz] of CORNERS) {
         v.set((sx * size.width) / 2, sy * size.thickness, (sz * size.depth) / 2).applyMatrix4(

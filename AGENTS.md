@@ -13,11 +13,12 @@ Status: early. Nothing is scaffolded yet. Keep this file short and grow it only 
 
 ## Tooling
 
-- Tool versions are managed with [mise](https://github.com/jdx/mise) in `mise.toml` (Go, Node, and the lint tools). Run `mise install` after cloning. Add a tool only when a part needs it; pin experiment-specific tools in the experiment's own `mise.toml`.
+- Tool versions are managed with [mise](https://github.com/jdx/mise) in `mise.toml` (Go, Node, pnpm, and the lint tools). Run `mise install` after cloning. Add a tool only when a part needs it; pin experiment-specific tools in the experiment's own `mise.toml`.
 - Everything runnable is a mise task: `mise run lint` (Markdown via markdownlint-cli2, spelling via typos), `mise run test`, and `mise run ci` for all of it. See `mise tasks`. Add new checks as tasks; CI (`.github/workflows/ci.yml`) calls them as separate steps on PRs and pushes to `main`.
 - [hk](https://hk.jdx.dev) (`hk.pkl`) is only for the git pre-commit hook (auto-fixes staged files). Run `hk install` once per clone. Don't call it from CI or tasks.
 - pnpm is the repo-wide package manager (pinned in `mise.toml`, lockfiles committed).
 - Oxlint and Oxfmt are the repo-wide JS/TS lint and format tools (root `.oxlintrc.json`, `.oxfmtrc.json`). Format with `mise run fmt`; Markdown stays with markdownlint.
+- Tests are Playwright smoke tests per experiment (e.g. a rendering check), run via mise (`test:<name>` tasks, part of `mise run test`). Run them from a mise task so the Chromium install runs first.
 - Review an experiment locally with `mise run dev:<name>`.
 - Keep Markdown consistent: fix lint errors rather than disabling rules; change rules in `.markdownlint-cli2.yaml` only on purpose.
 

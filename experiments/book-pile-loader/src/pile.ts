@@ -1,11 +1,16 @@
-import { BOOK_COUNT, exitDirection, type Rest } from "./timeline";
+import type { Rest } from "./timeline";
 import type { BookSize } from "./book";
 
 const SEED = 7;
-const WIDTHS = [2.4, 2.2, 2.0, 1.8, 1.6];
-const DEPTHS = [1.6, 1.5, 1.4, 1.3, 1.2];
-const THICKNESSES = [0.85, 0.5, 0.45, 0.55, 0.4];
-const YAWS = [-0.12, 0.25, -0.17, 0.11, -0.2];
+/** Bottom to top. */
+const BOOKS = [
+  { width: 2.4, depth: 1.6, thickness: 0.85, yaw: -0.12 },
+  { width: 2.2, depth: 1.5, thickness: 0.5, yaw: 0.25 },
+  { width: 2.0, depth: 1.4, thickness: 0.45, yaw: -0.17 },
+  { width: 1.8, depth: 1.3, thickness: 0.55, yaw: 0.11 },
+  { width: 1.6, depth: 1.2, thickness: 0.4, yaw: -0.2 },
+];
+export const BOOK_COUNT = BOOKS.length;
 const CLEARANCE_MARGIN = 0.15;
 
 // Deterministic RNG
@@ -23,36 +28,40 @@ function mulberry32(a: number) {
 const reachX = (size: BookSize, yaw: number) =>
   (size.width / 2) * Math.abs(Math.cos(yaw)) + (size.depth / 2) * Math.abs(Math.sin(yaw));
 
-export const PILE_SIZES: BookSize[] = WIDTHS.map((width, i) => ({
-  width,
-  depth: DEPTHS[i],
-  thickness: THICKNESSES[i],
-}));
-export const PILE_HEIGHT = THICKNESSES.reduce((sum, t) => sum + t, 0);
+export const PILE_HEIGHT = BOOKS.reduce((sum, book) => sum + book.thickness, 0);
+
+/** Books leave alternately to the right and to the left. */
+export const exitDirection = (i: number) => (i % 2 ? -1 : 1);
+
+export interface PileBook {
+  size: BookSize;
+  rest: Rest;
+}
 
 /** Deterministic pile: alternating angles and casual offsets, bottom to top. */
-export function createPile(): Rest[] {
+export function createPile(): PileBook[] {
   const rand = mulberry32(SEED);
   const range = (min: number, max: number) => min + (max - min) * rand();
-  const rests: Rest[] = [];
+  const pile: PileBook[] = [];
   let stackY = 0;
-  for (let i = 0; i < BOOK_COUNT; i++) {
-    const rest = {
+  let below: PileBook | undefined;
+  for (const [i, { yaw, ...size }] of BOOKS.entries()) {
+    const rest: Rest = {
       x: range(-0.1, 0.1),
       z: range(-0.1, 0.1),
-      yaw: YAWS[i],
+      yaw,
       y: stackY,
-      width: WIDTHS[i],
+      width: size.width,
       clearance: 0,
     };
     // slide far enough that neither footprint overlaps the book below (none below the first)
-    const reach = reachX(PILE_SIZES[i], rest.yaw);
-    const below = i > 0 ? rests[i - 1] : undefined;
-    const belowReach = below ? reachX(PILE_SIZES[i - 1], below.yaw) : 0;
-    const belowX = below ? below.x : rest.x;
+    const reach = reachX(size, yaw);
+    const belowReach = below ? reachX(below.size, below.rest.yaw) : 0;
+    const belowX = below ? below.rest.x : rest.x;
     rest.clearance = exitDirection(i) * (belowX - rest.x) + reach + belowReach + CLEARANCE_MARGIN;
-    rests.push(rest);
-    stackY += THICKNESSES[i];
+    below = { size, rest };
+    pile.push(below);
+    stackY += size.thickness;
   }
-  return rests;
+  return pile;
 }

@@ -1,4 +1,4 @@
 {
   "categories": { "correctness": "error" },
-  "ignorePatterns": ["node_modules", "dist"]
+  "ignorePatterns": ["node_modules", "dist", "test-results", "playwright-report"]
 }

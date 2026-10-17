@@ -1,22 +1,23 @@
+import { BOOK_COUNT, exitDirection } from "./pile";
+
 /** Pure timeline: pose(i, t) depends only on its inputs. */
-export const BOOK_COUNT = 5;
-export const START_STAGGER = 0.55;
-export const FALL_TIME = 0.55;
-export const BOUNCE_TIME = 0.3;
-export const BOUNCE_HEIGHT = 0.1;
-export const DROP_HEIGHT = 8;
-export const HOLD_TIME = 1;
+const START_STAGGER = 0.55;
+const FALL_TIME = 0.55;
+const BOUNCE_TIME = 0.3;
+const BOUNCE_HEIGHT = 0.1;
+const DROP_HEIGHT = 8;
+const HOLD_TIME = 1;
 /** Sideways slide over the book below, then a free fall once clear of it. */
-export const SLIDE_TIME = 0.3;
-export const FALL_OFF_TIME = 0.36;
-export const TOPPLE_TIME = SLIDE_TIME + FALL_OFF_TIME;
+const SLIDE_TIME = 0.3;
+const FALL_OFF_TIME = 0.36;
+const TOPPLE_TIME = SLIDE_TIME + FALL_OFF_TIME;
 /** The next book below starts when the one above has finished sliding clear of it. */
-export const TOPPLE_STAGGER = SLIDE_TIME;
+const TOPPLE_STAGGER = SLIDE_TIME;
 const SLIDE_ROLL = 0.35; // roll reached at the end of the slide
 const FALL_OFF_ROLL = 0.6; // extra roll while falling off
 const FALL_OFF_GRAVITY = 7;
 const SHRINK_TIME = 0.12; // scale to zero at the very end
-export const END_PAUSE = 0.4;
+const END_PAUSE = 0.4;
 
 const FALL_END = (BOOK_COUNT - 1) * START_STAGGER + FALL_TIME + BOUNCE_TIME;
 const TOPPLE_START = FALL_END + HOLD_TIME;
@@ -35,7 +36,7 @@ export interface Rest {
   /** Sideways travel (along the exit direction) after which the book no longer overlaps the one below. */
   clearance: number;
 }
-export interface Pose {
+interface Pose {
   visible: boolean;
   x: number;
   y: number;
@@ -45,14 +46,15 @@ export interface Pose {
   scale: number;
 }
 
-/** Horizontal camera azimuth (shared with main.ts). Exiting books slide parallel to the screen, so they never come closer to the camera. */
-export const CAMERA_AZIMUTH_DEG = 21;
-const EXIT_Z_PER_X = -Math.tan((CAMERA_AZIMUTH_DEG * Math.PI) / 180);
+/**
+ * Camera azimuth the exit slide is built around; main.ts imports it for the camera.
+ * Exiting books slide parallel to the screen, so they never come closer to the camera.
+ * Changing it changes the slide direction and the camera together.
+ */
+export const EXIT_SLIDE_AZIMUTH_DEG = 21;
+const EXIT_Z_PER_X = -Math.tan((EXIT_SLIDE_AZIMUTH_DEG * Math.PI) / 180);
 
 const clamp01 = (v: number) => Math.min(1, Math.max(0, v));
-
-/** Books leave alternately to the right and to the left. */
-export const exitDirection = (i: number) => (i % 2 ? -1 : 1);
 
 export function pose(i: number, rest: Rest, time: number): Pose {
   const t = ((time % TOTAL_TIME) + TOTAL_TIME) % TOTAL_TIME;

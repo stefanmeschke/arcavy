@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>book-pile-loader</title>
+    <title>Book pile loader</title>
     <style>
       html,
       body {
@@ -18,10 +18,18 @@
       canvas {
         display: block;
       }
+      .sr-only {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+        clip-path: inset(50%);
+        white-space: nowrap;
+      }
     </style>
   </head>
   <body>
-    <div id="scene" role="status" aria-label="Loading"></div>
+    <div id="scene" role="status"><span class="sr-only">Loading…</span></div>
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>

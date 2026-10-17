@@ -1,11 +1,12 @@
 import * as THREE from "three";
 
 /** Cover colours, bottom to top. */
-export const COLORS = [0x14213d, 0xfca311, 0xe5e5e5, 0xc9780a, 0xfdd28a];
+const NAVY = 0x14213d;
+const COLORS = [NAVY, 0xfca311, 0xe5e5e5, 0xc9780a, 0xfdd28a];
 const RIBBON_BOOK = 0; // long ribbon bookmark hanging off the front
 const RIBBON_COLOR = 0xfca311;
 const TAB_BOOK = 3; // short notched tab on the page face
-const TAB_COLOR = 0x14213d;
+const TAB_COLOR = NAVY;
 
 const COVER = 0.06; // cover shell thickness
 const PAGE_INSET_Z = 0.05; // pages are recessed from the front and back faces
@@ -70,11 +71,10 @@ const smoothstep = THREE.MathUtils.smoothstep;
 
 /**
  * A ribbon that lies on the page face, curves outward over the bottom cover lip
- * (clear of it by at least RIBBON_CLEARANCE), hangs in front of the cover and rests on the ground.
+ * and hangs in front of the cover down to the ground.
  * Points are (y, z) in the book's local space.
  */
-export const RIBBON_CLEARANCE = 0.01;
-export function ribbonPath(size: BookSize): [number, number][] {
+function ribbonPath(size: BookSize): [number, number][] {
   const front = size.depth / 2; // front edge of the covers
   const face = front - PAGE_INSET_Z + 0.008; // lying on the recessed page face
   return [
@@ -149,11 +149,12 @@ function mesh(geometry: THREE.BufferGeometry, material: THREE.Material | THREE.M
 export function createBook(size: BookSize, colorIndex: number): THREE.Group {
   const { width, depth, thickness } = size;
   const i = colorIndex % COLORS.length;
+  const coverColor = COLORS[i] ?? NAVY;
   const group = new THREE.Group();
 
-  group.add(mesh(extrude(coverShape(width, thickness), depth), lambert(COLORS[i])));
+  group.add(mesh(extrude(coverShape(width, thickness), depth), lambert(coverColor)));
 
-  // caps are the white page faces, sides the pale blue open side
+  // caps are the white page faces, sides the warm white open side
   group.add(
     mesh(extrude(pagesShape(width, thickness), depth - 2 * PAGE_INSET_Z), [
       pageFaceMat,

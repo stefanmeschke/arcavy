@@ -1,6 +1,7 @@
 {
   "compilerOptions": {
     "strict": true,
+    "noUncheckedIndexedAccess": true,
     "noEmit": true,
     "target": "ES2022",
     "module": "ESNext",
@@ -9,5 +10,5 @@
     "types": ["vite/client"],
     "skipLibCheck": true
   },
-  "include": ["src"]
+  "include": ["src", "tests", "playwright.config.ts"]
 }

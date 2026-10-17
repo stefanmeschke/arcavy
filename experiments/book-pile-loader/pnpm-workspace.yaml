@@ -1,0 +1,2 @@
+# Only install package versions published at least 7 days ago (minutes), matching the Dependabot cooldown.
+minimumReleaseAge: 10080
