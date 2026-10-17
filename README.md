@@ -18,3 +18,7 @@ mise install   # installs the tool versions from mise.toml
 - `AGENTS.md`: conventions for contributors and coding agents.
 
 Work is tracked in [GitHub Issues](https://github.com/stefanmeschke/arcavy/issues).
+
+## License
+
+[AGPL-3.0-or-later](LICENSE). Copyright (C) 2026 Stefan Meschke.
