@@ -1,3 +1,6 @@
+[settings]
+experimental = true
+
 [tools]
 go = "1.27"
 node = "22"
@@ -28,20 +31,28 @@ run = "oxfmt --check"
 description = "Format JS/TS/JSON/HTML/CSS with Oxfmt"
 run = "oxfmt"
 
+[deps.book-pile-loader]
+description = "Install book-pile-loader dependencies"
+run = "pnpm install --frozen-lockfile"
+dir = "experiments/book-pile-loader"
+auto = true
+sources = ["package.json", "pnpm-lock.yaml"]
+outputs = ["node_modules"]
+
 [tasks."dev:book-pile-loader"]
 description = "Serve book-pile-loader experiment"
 dir = "experiments/book-pile-loader"
-run = "pnpm install --frozen-lockfile && pnpm dev"
+run = "pnpm dev"
 
 [tasks."typecheck:book-pile-loader"]
 description = "Typecheck book-pile-loader experiment"
 dir = "experiments/book-pile-loader"
-run = "pnpm install --frozen-lockfile && pnpm typecheck"
+run = "pnpm typecheck"
 
 [tasks."build:book-pile-loader"]
 description = "Build book-pile-loader experiment"
 dir = "experiments/book-pile-loader"
-run = "pnpm install --frozen-lockfile && pnpm build"
+run = "pnpm build"
 
 [tasks.lint]
 description = "Run all linters"
