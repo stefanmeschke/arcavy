@@ -13,9 +13,14 @@ Status: early. Nothing is scaffolded yet. Keep this file short and grow it only 
 
 ## Tooling
 
-- Tool versions are managed with [mise](https://github.com/jdx/mise) in `mise.toml` (Go, Node, and the lint tools). Run `mise install` after cloning. Add a tool only when a part needs it; pin experiment-specific tools in the experiment's own `mise.toml`.
+- Tool versions are managed with [mise](https://github.com/jdx/mise) in `mise.toml` (Go, Node, pnpm, and the lint tools). Run `mise install` after cloning. Add a tool only when a part needs it; pin experiment-specific tools in the experiment's own `mise.toml`.
+- mise runs in monorepo mode: the root `mise.toml` holds the shared tools and repo-wide tasks, and each experiment has its own `mise.toml` (listed in `[monorepo].config_roots`) with short task names addressed as `//experiments/<name>:<task>`.
 - Everything runnable is a mise task: `mise run lint` (Markdown via markdownlint-cli2, spelling via typos), `mise run test`, and `mise run ci` for all of it. See `mise tasks`. Add new checks as tasks; CI (`.github/workflows/ci.yml`) calls them as separate steps on PRs and pushes to `main`.
 - [hk](https://hk.jdx.dev) (`hk.pkl`) is only for the git pre-commit hook (auto-fixes staged files). Run `hk install` once per clone. Don't call it from CI or tasks.
+- pnpm is the repo-wide package manager (pinned in `mise.toml`, lockfiles committed). Dependencies are pinned to exact versions in `package.json` (no `^`/`~`); Dependabot bumps them.
+- Oxlint and Oxfmt are the repo-wide JS/TS lint and format tools (root `.oxlintrc.json`, `.oxfmtrc.json`). Format with `mise run fmt`; Markdown stays with markdownlint.
+- Tests use each part's native tooling; frontend/browser code uses Vitest browser mode with the Playwright provider. Run them with `mise run '//...:test'` (all parts) or `mise run //experiments/<name>:test` (one part), never bare `vitest`, so the Chromium install runs first.
+- Review an experiment locally with `mise run //experiments/<name>:dev`.
 - Keep Markdown consistent: fix lint errors rather than disabling rules; change rules in `.markdownlint-cli2.yaml` only on purpose.
 
 ## Layout

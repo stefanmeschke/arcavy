@@ -15,6 +15,16 @@ hooks {
         check = "markdownlint-cli2 {{files}}"
         fix = "markdownlint-cli2 --fix {{files}}"
       }
+      ["oxlint"] {
+        glob = List("**/*.{js,jsx,ts,tsx,mjs,cjs}")
+        check = "oxlint {{files}}"
+        fix = "oxlint --fix {{files}}"
+      }
+      ["oxfmt"] {
+        glob = List("**/*.{js,jsx,ts,tsx,json,jsonc,html,css}")
+        check = "oxfmt --check {{files}}"
+        fix = "oxfmt {{files}}"
+      }
     }
   }
 }

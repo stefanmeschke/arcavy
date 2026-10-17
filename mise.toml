@@ -1,17 +1,41 @@
+min_version = "2026.10.8"
+monorepo_root = true
+
+[monorepo]
+config_roots = ["experiments/*"]
+
+[settings]
+experimental = true
+
 [tools]
 go = "1.27"
 node = "22"
+pnpm = "12.14.0"
+"npm:oxlint" = "1.88.0"
+oxfmt = "0.73.0"
 hk = "2.6.0"
 markdownlint-cli2 = "0.23.2"
 typos = "1.51.1"
 
 [tasks."lint:md"]
 description = "Lint Markdown"
-run = "markdownlint-cli2 '**/*.md' '#node_modules'"
+run = "markdownlint-cli2 '**/*.md' '#**/node_modules'"
 
 [tasks."lint:spelling"]
 description = "Spell-check docs and code"
 run = "typos"
+
+[tasks."lint:js"]
+description = "Lint JS/TS with Oxlint"
+run = "oxlint"
+
+[tasks."lint:fmt"]
+description = "Check formatting with Oxfmt"
+run = "oxfmt --check"
+
+[tasks.fmt]
+description = "Format JS/TS/JSON/HTML/CSS with Oxfmt"
+run = "oxfmt"
 
 [tasks.lint]
 description = "Run all linters"
@@ -19,8 +43,14 @@ depends = ["lint:*"]
 
 [tasks.test]
 description = "Run all tests"
-run = "echo 'no tests yet'"
+depends = ["//...:test"]
 
 [tasks.ci]
 description = "Everything CI runs"
-depends = ["lint", "test"]
+# Sequential, like the CI workflow steps.
+run = [
+  { task = "lint" },
+  { task = "//...:typecheck" },
+  { task = "//...:build" },
+  { task = "test" },
+]

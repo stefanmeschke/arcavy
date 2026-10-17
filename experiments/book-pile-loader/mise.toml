@@ -1,0 +1,27 @@
+[deps.npm]
+description = "Install dependencies"
+run = "pnpm install --frozen-lockfile"
+auto = true
+sources = ["package.json", "pnpm-lock.yaml"]
+outputs = ["node_modules"]
+
+[tasks.dev]
+description = "Serve the experiment"
+run = "pnpm dev"
+
+[tasks.typecheck]
+description = "Typecheck"
+run = "pnpm typecheck"
+
+[tasks.build]
+description = "Build"
+run = "pnpm build"
+
+[tasks."install:browsers"]
+description = "Install the Chromium browser for the tests (no-op when present)"
+run = "if [ -n \"$CI\" ]; then pnpm exec playwright install --with-deps chromium; else pnpm exec playwright install chromium; fi"
+
+[tasks.test]
+description = "Vitest browser rendering smoke test"
+depends = ["install:browsers"]
+run = "pnpm test"
