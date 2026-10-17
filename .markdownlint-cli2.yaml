@@ -1,0 +1,5 @@
+config:
+  default: true
+  MD013: false # line length: don't hard-wrap prose
+  MD033: false # allow inline HTML (e.g. comments in templates)
+  MD041: false # PR template starts at ## on purpose

@@ -1,3 +1,18 @@
 [tools]
 go = "1.27"
 node = "22"
+hk = "2.6.0"
+markdownlint-cli2 = "0.23.2"
+typos = "1.51.1"
+
+[tasks."lint:md"]
+description = "Lint Markdown"
+run = "markdownlint-cli2 '**/*.md' '#node_modules'"
+
+[tasks."lint:spelling"]
+description = "Spell-check docs and code"
+run = "typos"
+
+[tasks.lint]
+description = "Run all linters"
+depends = ["lint:*"]
